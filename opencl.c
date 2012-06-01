@@ -118,6 +118,7 @@ void destroy_opencl(cl_program* program, cl_kernel* kernel, cl_context* context,
 
 /*
  * Returns 0 if no suitable device was found.
+ * Makes sure that the device supports 64-bit floats.
  */
 int get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
 {
@@ -147,7 +148,7 @@ int get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
                         if (extensions_len > 0) {
                                 an_extension = strtok(extensions, " ");
                                 while (an_extension != NULL) {
-                                        if( strcmp( "cl_khr_global_int32_base_atomics", an_extension) == 0) {
+                                        if( strcmp( "cl_khr_fp64", an_extension) == 0) {
                                                 unsigned long long score = clockFreq*numberOfCores+amountOfMemory;
                                                 if(score>best_score) {
                                                         *ret_platform = i;
