@@ -26,7 +26,7 @@ int main(int argc, char **argv)
         unsigned int correct;				// number of correct results returned
 
 
-        // Fill our data set with random unsigned int values
+        // Fill our data set with random values
         int i = 0;
 		unsigned int count = DATA_SIZE;
 		for(i = 0; i < count; i++)
