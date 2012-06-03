@@ -5,10 +5,9 @@ A simple example of using OpenCL with C99.
 
 Compile and execute
 -------------------
-´´´
-make
-./sample
-´´´
+    make
+    ./sample
+
 
 Supporting directories:
  * opencl11 - OpenCL 1.1 header files
