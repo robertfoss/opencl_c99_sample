@@ -9,8 +9,16 @@ Compile and execute
     ./sample
 
 
-Supporting directories:
+Supporting directories
+----------------------
  * opencl11 - OpenCL 1.1 header files
+ 
+
+Required software (Debian)
+--------------------------
+ * GPU drivers supporting OpenCL. Nvidia propietary or fglrx.
+ * opencl-headers
+ * mesa-common-dev
 
 
 License
