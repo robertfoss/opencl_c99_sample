@@ -1,9 +1,8 @@
 A simple example of using OpenCL with C99.
 
 Compile and execute:
-cd liveness
 make
-./liveness
+./sample
 
 
 Supporting directories:

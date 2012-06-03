@@ -2,12 +2,12 @@ CFLAGS = -g -Wall -O2 -ffast-math -std=c99
 CC = gcc
 LIBS = -lm -lOpenCL
 INCLUDES = -Iopencl11/
-SRCS = opencl.c util.c liveness.c
+SRCS = opencl.c util.c sample.c
 
-all: liveness
+all: sample
 
 # The variable $@ has the value of the target. In this case $@ = psort
-liveness: opencl.o util.o liveness.o
+sample: opencl.o util.o sample.o
 	${CC} ${CFLAGS} ${INCLUDES} -o $@ ${SRCS} ${LIBS}
 
 .c.o:
