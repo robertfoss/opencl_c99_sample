@@ -44,7 +44,6 @@ void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl
 
         // Device
         err = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_ALL, sizeof(devices), devices, NULL); //NULL, ignore number returned devices.
-        //error = clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
         if (err != CL_SUCCESS) {
                 printf("Error getting device ids: %s\n", ocl_error_string(err));
                 exit(err);
