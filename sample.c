@@ -8,7 +8,7 @@
 
 #define DATA_SIZE (1024)
 
-int main(int argc, char **argv)
+int main()
 {
         cl_int err;							// error code returned from api calls
         size_t global;						// global domain size for our calculation
@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 
 
         // Fill our data set with random values
-        int i = 0;
+        unsigned int i = 0;
 		unsigned int count = DATA_SIZE;
 		for(i = 0; i < count; i++)
 		    data[i] = (float) (rand() / (float)RAND_MAX);

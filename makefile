@@ -1,4 +1,4 @@
-CFLAGS = -g -Wall -O2 -ffast-math -std=c99
+CFLAGS = -g -Wall -Wextra -Werror -O2 -ffast-math -std=c99
 CC = gcc
 LIBS = -lm -lOpenCL
 INCLUDES = -Iopencl11/
