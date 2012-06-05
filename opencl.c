@@ -79,20 +79,25 @@ void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl
         // Build the program executable
         err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
         if (err != CL_SUCCESS) {
-                size_t len;
-                char buffer[2048];
+                char* build_log;
+                size_t log_size;
+                // First call to know the proper size
+                clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
+                build_log = malloc(sizeof(char)*(log_size+1));
+                // Second call to get the log
+                clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, log_size, build_log, NULL);
+                build_log[log_size] = '\0';
+                printf("%s\n", build_log);
+                free(build_log);
 
-                printf("Error: Failed to build program executable!\n\n");
-                clGetProgramBuildInfo(program, *device_id, CL_PROGRAM_BUILD_LOG, sizeof(buffer), buffer, &len);
-                printf("%s\n", buffer);
-                exit(1);
+                exit(err);
         }
 
         // Create the compute kernel in the program we wish to run
         *kernel = clCreateKernel(program, cl_source_main, &err);
         if (!kernel || err != CL_SUCCESS) {
                 printf("Error: Failed to create compute kernel!\n");
-                exit(1);
+                exit(err);
         }
 }
 
