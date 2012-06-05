@@ -28,7 +28,7 @@ void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl
 
         if(!get_best_device(&best_platform, &best_device)) {
                 printf("No suitable device was found! Try using an OpenCL1.1 compatible device.\n");
-                exit(err);
+                exit(1);
         }
         printf("Initiating platform-%d device-%d.\n", best_platform, best_device);
 
