@@ -82,10 +82,10 @@ void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl
                 char* build_log;
                 size_t log_size;
                 // First call to know the proper size
-                clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
+                clGetProgramBuildInfo(program, *device_id, CL_PROGRAM_BUILD_LOG, 0, NULL, &log_size);
                 build_log = malloc(sizeof(char)*(log_size+1));
                 // Second call to get the log
-                clGetProgramBuildInfo(program, device_id, CL_PROGRAM_BUILD_LOG, log_size, build_log, NULL);
+                clGetProgramBuildInfo(program, *device_id, CL_PROGRAM_BUILD_LOG, log_size, build_log, NULL);
                 build_log[log_size] = '\0';
                 printf("%s\n", build_log);
                 free(build_log);
