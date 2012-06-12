@@ -2,12 +2,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "CL/cl.h"
-
 #include "opencl.h"
 #include "util.h"
 
-char *file_contents(const char *filename, int *length)
+char *
+file_contents(const char *filename, int *length)
 {
         FILE *f = fopen(filename, "r");
         void *buffer;
@@ -32,9 +31,9 @@ char *file_contents(const char *filename, int *length)
 
 
 
-// Helper function to get error string
-// *********************************************************************
-const char* ocl_error_string(cl_int error)
+/* Helper function to get error string. */
+const char * 
+ocl_error_string(cl_int error)
 {
         static const char* errorString[] = {
                 "CL_SUCCESS",
@@ -104,10 +103,18 @@ const char* ocl_error_string(cl_int error)
         };
 
         const int errorCount = sizeof(errorString) / sizeof(errorString[0]);
-
         const int index = -error;
-
         return (index >= 0 && index < errorCount) ? errorString[index] : "";
+}
 
+void
+ocl_error(const char *descr, cl_int err)
+{
+        if(err != CL_SUCCESS){
+		printf("Error: %s: Errorcode #%d - \n", descr, ocl_error_string(err), err);
+		exit(err);
+	}
+
+	
 }
 
