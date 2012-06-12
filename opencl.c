@@ -36,33 +36,24 @@ setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl_devi
 
         // Platform
         err = clGetPlatformIDs(MAX_RESOURCES, platforms, NULL);
-        if (err != CL_SUCCESS) {
-                printf("Error getting platform id: %s\n", ocl_error_string(err));
-                exit(err);
-        }
+	ocl_error("Getting platform id", err);
+
         platform_id = platforms[best_platform];
 
         // Device
         err = clGetDeviceIDs(platform_id, CL_DEVICE_TYPE_ALL, sizeof(devices), devices, NULL); //NULL, ignore number returned devices.
-        if (err != CL_SUCCESS) {
-                printf("Error getting device ids: %s\n", ocl_error_string(err));
-                exit(err);
-        }
+	ocl_error("Getting device ids", err);
+
         *device_id = devices[best_device];
 
         // Context
         *context = clCreateContext(0, 1, device_id, NULL, NULL, &err);
-        if (err != CL_SUCCESS) {
-                printf("Error creating context: %s.", ocl_error_string(err));
-                exit(err);
-        }
+	ocl_error("Creating context", err);
 
         // Command-queue
         *queue = clCreateCommandQueue(*context, *device_id, 0, &err);
-        if (err != CL_SUCCESS) {
-                printf("Error creating command queue: %s", ocl_error_string(err));
-                exit(err);
-        }
+	ocl_error("Creating command queue", err);
+
 
         // Read .cl source into memory
         int cl_source_len = 0;
@@ -71,10 +62,8 @@ setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl_devi
 
         // Create thes compute program from the source buffer
         program = clCreateProgramWithSource(*context, 1, (const char **) &cl_source, NULL, &err);
-        if (err != CL_SUCCESS) {
-                printf("Error: Failed to create compute program: %s", ocl_error_string(err));
-                exit(err);
-        }
+	ocl_error("Failed to create compute program", err);
+
 
         // Build the program executable
         err = clBuildProgram(program, 0, NULL, NULL, NULL, NULL);
@@ -93,12 +82,10 @@ setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl_devi
                 exit(err);
         }
 
+
         // Create the compute kernel in the program we wish to run
         *kernel = clCreateKernel(program, cl_source_main, &err);
-        if (!kernel || err != CL_SUCCESS) {
-                printf("Error: Failed to create compute kernel!\n");
-                exit(err);
-        }
+	ocl_error("Failed to create compute kernel", err);
 }
 
 /*
@@ -135,25 +122,19 @@ get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
         cl_ulong maxAllocatableMem;
 
         err = clGetPlatformIDs(MAX_RESOURCES, platform, &num_platform);
-	if(err != CL_SUCCESS) {
-		printf("Error getting platform ids: %s\n", ocl_error_string(err));
-		exit(err);
-	};
+	ocl_error("Getting platform ids", err);
+
         for(unsigned int i = 0; i < num_platform; i++) {
                 err = clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
-		if(err != CL_SUCCESS) {
-			printf("Error getting device ids: %s\n", ocl_error_string(err));
-			exit(err);
-		}
+		ocl_error("Getting device ids", err);
+
                 for(unsigned int j = 0; j < num_devices; ++j) {
                         err  = clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(numberOfCores), &numberOfCores, NULL);
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(amountOfMemory), &amountOfMemory, NULL);
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(clockFreq), &clockFreq, NULL);
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(maxAllocatableMem), &maxAllocatableMem, NULL);
-			if(err != CL_SUCCESS) {
-				printf("Error, unable to get device info.\n");
-				exit(err);
-			}
+			ocl_error("Unable to get device info", err);
+
 			score = clockFreq*numberOfCores + amountOfMemory;
 		        if(score>best_score) {
 		                *ret_platform = i;
@@ -187,22 +168,14 @@ print_devices(int print_extensions)
         size_t extensions_len = 0;
 
         err = clGetPlatformIDs(MAX_RESOURCES, platform, &num_platform);
-	if(err != CL_SUCCESS) {
-		printf("Error getting platform ids: %s\n", ocl_error_string(err));
-		exit(err);
-	}
+	ocl_error("Getting platform ids", err);
+
         for(unsigned int i = 0; i < num_platform; i++) {
                 err = clGetPlatformInfo (platform[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
-		if(err != CL_SUCCESS) {
-			printf("Error getting platform info: %s\n", ocl_error_string(err));
-			exit(err);
-		}
+		ocl_error("Getting platform info", err);
 
                 err = clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
-		if(err != CL_SUCCESS) {
-			printf("Error getting device ids: %s\n", ocl_error_string(err));
-			exit(err);
-		}
+		ocl_error("Getting device ids", err);
                 for(unsigned int j = 0; j < num_devices; ++j) {
                         err  = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(deviceName), deviceName, NULL);
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL);
@@ -213,10 +186,7 @@ print_devices(int print_extensions)
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_LOCAL_MEM_SIZE, sizeof(localMem), &localMem, NULL);
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_AVAILABLE, sizeof(available), &available, NULL);
                         err |= clGetDeviceInfo(devices[j], CL_DEVICE_EXTENSIONS, sizeof(extensions), &extensions, &extensions_len);
-			if(err != CL_SUCCESS) {
-				printf("Error, unable to get device info.\n");
-				exit(err);
-			}
+			ocl_error("Unable to get device info", err);
 
                         printf("Platform-%d Device-%d\t%s - %s\tCores: %d\tMemory: %ldMB\tAvailable: %s\n",
                                i, j, vendor, deviceName, numberOfCores, (maxAllocatableMem/(1024*1024)), (available ? "Yes" : "No"));
