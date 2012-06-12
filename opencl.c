@@ -6,13 +6,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "CL/cl.h"
 #include "opencl.h"
 #include "util.h"
 
 
-void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl_device_id* device_id,
-				 cl_kernel* kernel, cl_context* context, cl_command_queue* queue)
+void
+setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl_device_id* device_id,
+                  cl_kernel* kernel, cl_context* context, cl_command_queue* queue)
 {
         cl_int err;                            // error code returned from api calls
 
@@ -24,7 +24,7 @@ void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl
 
         unsigned int best_platform = 0;
         unsigned int best_device = 0;
-        print_devices();
+        print_devices(0);
 
         if(!get_best_device(&best_platform, &best_device)) {
                 printf("No suitable device was found! Try using an OpenCL1.1 compatible device.\n");
@@ -104,7 +104,8 @@ void setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl
 /*
  * Free allocated OpenCL resources. Note: cl_mem objects are NOT free'd.
  */
-void destroy_opencl(cl_program* program, cl_kernel* kernel, cl_context* context, cl_command_queue* queue)
+void
+destroy_opencl(cl_program* program, cl_kernel* kernel, cl_context* context, cl_command_queue* queue)
 {
         // Shutdown and cleanup
         clReleaseProgram(*program);
@@ -116,11 +117,13 @@ void destroy_opencl(cl_program* program, cl_kernel* kernel, cl_context* context,
 
 /*
  * Returns 0 if no suitable device was found.
- * Makes sure that the device supports 64-bit floats.
  */
-int get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
+int
+get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
 {
+	cl_int err = CL_SUCCESS;
         unsigned long long best_score = 0;
+	unsigned long long score;
 
         cl_platform_id platform[MAX_RESOURCES];
         cl_uint num_platform = MAX_RESOURCES;
@@ -130,30 +133,32 @@ int get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
         cl_long amountOfMemory;
         cl_uint clockFreq;
         cl_ulong maxAllocatableMem;
-        char extensions[4096];
-        size_t extensions_len = 0;
 
-        clGetPlatformIDs(MAX_RESOURCES, platform, &num_platform);
+        err = clGetPlatformIDs(MAX_RESOURCES, platform, &num_platform);
+	if(err != CL_SUCCESS) {
+		printf("Error getting platform ids: %s\n", ocl_error_string(err));
+		exit(err);
+	};
         for(unsigned int i = 0; i < num_platform; i++) {
-                clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
+                err = clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
+		if(err != CL_SUCCESS) {
+			printf("Error getting device ids: %s\n", ocl_error_string(err));
+			exit(err);
+		}
                 for(unsigned int j = 0; j < num_devices; ++j) {
-                        clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(numberOfCores), &numberOfCores, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(amountOfMemory), &amountOfMemory, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(clockFreq), &clockFreq, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(maxAllocatableMem), &maxAllocatableMem, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_EXTENSIONS, sizeof(extensions), &extensions, &extensions_len);
-                        char* an_extension;
-                        if (extensions_len > 0) {
-                                an_extension = strtok(extensions, " ");
-                                while (an_extension != NULL) {
-                                	unsigned long long score = clockFreq*numberOfCores+amountOfMemory;
-                                        if(score>best_score) {
-                                                *ret_platform = i;
-                                                *ret_device = j;
-                                        }
-                                        an_extension = strtok(NULL, " ");
-                                }
-                        }
+                        err  = clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(numberOfCores), &numberOfCores, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(amountOfMemory), &amountOfMemory, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(clockFreq), &clockFreq, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(maxAllocatableMem), &maxAllocatableMem, NULL);
+			if(err != CL_SUCCESS) {
+				printf("Error, unable to get device info.\n");
+				exit(err);
+			}
+			score = clockFreq*numberOfCores + amountOfMemory;
+		        if(score>best_score) {
+		                *ret_platform = i;
+		                *ret_device = j;
+		        }
                 }
 
         }
@@ -161,8 +166,11 @@ int get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
 }
 
 
-void print_devices()
+void
+print_devices(int print_extensions)
 {
+	cl_int err = CL_SUCCESS;
+
         cl_platform_id platform[MAX_RESOURCES];
         cl_uint num_platform = MAX_RESOURCES;
         char vendor[1024];
@@ -178,27 +186,42 @@ void print_devices()
         char extensions[4096];
         size_t extensions_len = 0;
 
-        clGetPlatformIDs(MAX_RESOURCES, platform, &num_platform);
+        err = clGetPlatformIDs(MAX_RESOURCES, platform, &num_platform);
+	if(err != CL_SUCCESS) {
+		printf("Error getting platform ids: %s\n", ocl_error_string(err));
+		exit(err);
+	}
         for(unsigned int i = 0; i < num_platform; i++) {
-                clGetPlatformInfo (platform[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
+                err = clGetPlatformInfo (platform[i], CL_PLATFORM_VENDOR, sizeof(vendor), vendor, NULL);
+		if(err != CL_SUCCESS) {
+			printf("Error getting platform info: %s\n", ocl_error_string(err));
+			exit(err);
+		}
 
-                clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
+                err = clGetDeviceIDs(platform[i], CL_DEVICE_TYPE_ALL, sizeof(devices), devices, &num_devices);
+		if(err != CL_SUCCESS) {
+			printf("Error getting device ids: %s\n", ocl_error_string(err));
+			exit(err);
+		}
                 for(unsigned int j = 0; j < num_devices; ++j) {
-                        clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(deviceName), deviceName, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(numberOfCores), &numberOfCores, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(amountOfMemory), &amountOfMemory, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(clockFreq), &clockFreq, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(maxAllocatableMem), &maxAllocatableMem, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_LOCAL_MEM_SIZE, sizeof(localMem), &localMem, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_AVAILABLE, sizeof(available), &available, NULL);
-                        clGetDeviceInfo(devices[j], CL_DEVICE_EXTENSIONS, sizeof(extensions), &extensions, &extensions_len);
-
+                        err  = clGetDeviceInfo(devices[j], CL_DEVICE_NAME, sizeof(deviceName), deviceName, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_VENDOR, sizeof(vendor), vendor, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_COMPUTE_UNITS, sizeof(numberOfCores), &numberOfCores, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(amountOfMemory), &amountOfMemory, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_CLOCK_FREQUENCY, sizeof(clockFreq), &clockFreq, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_MAX_MEM_ALLOC_SIZE, sizeof(maxAllocatableMem), &maxAllocatableMem, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_LOCAL_MEM_SIZE, sizeof(localMem), &localMem, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_AVAILABLE, sizeof(available), &available, NULL);
+                        err |= clGetDeviceInfo(devices[j], CL_DEVICE_EXTENSIONS, sizeof(extensions), &extensions, &extensions_len);
+			if(err != CL_SUCCESS) {
+				printf("Error, unable to get device info.\n");
+				exit(err);
+			}
 
                         printf("Platform-%d Device-%d\t%s - %s\tCores: %d\tMemory: %ldMB\tAvailable: %s\n",
                                i, j, vendor, deviceName, numberOfCores, (maxAllocatableMem/(1024*1024)), (available ? "Yes" : "No"));
                         char* an_extension;
-                        if (extensions_len > 0) {
+                        if (extensions_len > 0 && print_extensions) {
 
                                 printf("\t\tExtensions: \t");
                                 an_extension = strtok(extensions, " ");
