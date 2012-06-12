@@ -146,12 +146,10 @@ int get_best_device(unsigned int *ret_platform, unsigned int *ret_device)
                         if (extensions_len > 0) {
                                 an_extension = strtok(extensions, " ");
                                 while (an_extension != NULL) {
-                                        if( strcmp( "cl_khr_fp64", an_extension) == 0) {
-                                                unsigned long long score = clockFreq*numberOfCores+amountOfMemory;
-                                                if(score>best_score) {
-                                                        *ret_platform = i;
-                                                        *ret_device = j;
-                                                }
+                                	unsigned long long score = clockFreq*numberOfCores+amountOfMemory;
+                                        if(score>best_score) {
+                                                *ret_platform = i;
+                                                *ret_device = j;
                                         }
                                         an_extension = strtok(NULL, " ");
                                 }
