@@ -110,11 +110,8 @@ ocl_error_string(cl_int error)
 void
 ocl_error(const char *descr, cl_int err)
 {
-        if(err != CL_SUCCESS){
-		printf("Error: %s: Errorcode #%d - \n", descr, ocl_error_string(err), err);
+	if(err != CL_SUCCESS){
+		printf("Error: %s: Errorcode #%d - %s\n", descr, err, ocl_error_string(err));
 		exit(err);
-	}
-
-	
+	}	
 }
-
