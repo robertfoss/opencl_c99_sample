@@ -14,10 +14,10 @@ void
 setup_opencl(const char* cl_source_filename, const char* cl_source_main, cl_device_id* device_id,
                   cl_kernel* kernel, cl_context* context, cl_command_queue* queue)
 {
-        cl_int err;                            // error code returned from api calls
+        cl_int err;					// error code returned from api calls
 
-        cl_platform_id platform_id;				// compute device id
-        cl_program program;						// compute program
+        cl_platform_id platform_id;			// compute device id
+        cl_program program;				// compute program
         cl_device_id devices[MAX_RESOURCES];
         cl_platform_id platforms[MAX_RESOURCES];
 
