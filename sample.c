@@ -10,20 +10,20 @@
 
 int main()
 {
-        cl_int err;							// error code returned from api calls
-        size_t global;						// global domain size for our calculation
-        size_t local;						// local domain size for our calculation
-        cl_device_id device_id;				// device id running computation
-        cl_context context;					// compute context
-        cl_command_queue queue;				// compute command queue
-        cl_kernel kernel;					// compute kernel
+        cl_int err;                         // error code returned from api calls
+        size_t global;                      // global domain size for our calculation
+        size_t local;                       // local domain size for our calculation
+        cl_device_id device_id;             // device id running computation
+        cl_context context;                 // compute context
+        cl_command_queue queue;             // compute command queue
+        cl_kernel kernel;                   // compute kernel
 
         cl_mem input;                       // device memory used for the input array
         cl_mem output;                      // device memory used for the output array
 
-        float data[DATA_SIZE];				// original data set given to device
-        float results[DATA_SIZE];			// results returned from device
-        unsigned int correct;				// number of correct results returned
+        float data[DATA_SIZE];              // original data set given to device
+        float results[DATA_SIZE];           // results returned from device
+        unsigned int correct;               // number of correct results returned
 
 
         // Fill our data set with random values
