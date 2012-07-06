@@ -53,12 +53,12 @@ int main()
                 exit(1);
         }
 
-		// Write our data set into the input array in device memory 
-		err = clEnqueueWriteBuffer(queue, input, CL_TRUE, 0, sizeof(float) * count, data, 0, NULL, NULL);
-		if (err != CL_SUCCESS) {
-		    printf("Error: Failed to write to source array: %s\n", ocl_error_string(err));
-		    exit(1);
-		}
+	// Write our data set into the input array in device memory 
+	err = clEnqueueWriteBuffer(queue, input, CL_TRUE, 0, sizeof(float) * count, data, 0, NULL, NULL);
+	if (err != CL_SUCCESS) {
+		printf("Error: Failed to write to source array: %s\n", ocl_error_string(err));
+		exit(1);
+	}
 
         // Set the arguments to our compute kernel
         err  = clSetKernelArg(kernel, 0, sizeof(cl_mem), &input);
